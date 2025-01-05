@@ -1,0 +1,22 @@
+/* Custom Styles */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    margin-top: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.modal-body input,
+.modal-body select {
+    margin-bottom: 10px;
+}
+
+.alert {
+    margin-top: 20px;
+}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <title>Home - Digital Library</title>
+    <!-- Link to external CSS -->
+    <link href="static/styles.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Welcome to the Digital Library!</h1>
+
+        <!-- Alert Container -->
+        <div id="alert-container"></div>
+
+        <!-- Links to add author and book -->
+        <p>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#addAuthorModal">Add Author</button>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#addBookModal">Add Book</button>
+        </p>
+
+        <!-- Search Form -->
+        <form method="POST" action="{{ url_for('home') }}">
+            <input type="text" name="search_query" placeholder="Search for a book or author" required class="form-control">
+            <button type="submit" class="btn btn-success mt-2">Search</button>
+        </form>
+
+        <!-- Sorting Form -->
+        <h2 class="my-4">Sort Books:</h2>
+        <form method="GET" action="{{ url_for('home') }}">
+            <label for="sort_by">Sort By:</label>
+            <select name="sort_by" id="sort_by" class="form-control w-auto">
+                <option value="title">Title</option>
+                <option value="author">Author</option>
+            </select>
+            <button type="submit" class="btn btn-info mt-2">Sort</button>
+        </form>
+
+        <h2 class="my-4">Books List:</h2>
+        {% if books %}
+            <ul class="list-group">
+                {% for book in books %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" id="book-{{ book.id }}">
+                        {{ book.title }} by {{ book.author.name }}
+                        <!-- Delete Book Button with Ajax -->
+                        <button type="button" class="btn btn-danger btn-sm delete-book" data-book-id="{{ book.id }}">Delete</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No books found matching your search criteria.</p>
+        {% endif %}
+    </div>
+
+    <!-- Modal for Adding Book -->
+    <div class="modal fade" id="addBookModal" tabindex="-1" role="dialog" aria-labelledby="addBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addBookForm">
+                        <div class="form-group">
+                            <label for="isbn">ISBN:</label>
+                            <input type="text" id="isbn" name="isbn" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Book Title:</label>
+                            <input type="text" id="title" name="title" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="publication_year">Publication Year:</label>
+                            <input type="number" id="publication_year" name="publication_year" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="author_id">Author:</label>
+                            <select id="author_id" name="author_id" class="form-control" required>
+                                <!-- Authors will be loaded dynamically here via AJAX -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Book</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Author -->
+    <div class="modal fade" id="addAuthorModal" tabindex="-1" role="dialog" aria-labelledby="addAuthorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAuthorModalLabel">Add Author</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAuthorForm">
+                        <div class="form-group">
+                            <label for="name">Author Name:</label>
+                            <input type="text" id="name" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="birth_date">Birth Date:</label>
+                            <input type="date" id="birth_date" name="birth_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date_of_death">Date of Death (optional):</label>
+                            <input type="date" id="date_of_death" name="date_of_death" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Author</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="successMessage">
+                    <!-- Success message will be displayed here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="reloadButton">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Link to external JavaScript -->
+    <script src="static/app.js"></script>
+</body>
+</html>
