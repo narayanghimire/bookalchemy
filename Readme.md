@@ -1,4 +1,4 @@
-# Library Management System
+# Digital Library
 
 A simple library management system built with Flask and SQLAlchemy for managing books and authors. 
 
